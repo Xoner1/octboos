@@ -1,6 +1,6 @@
 {
   "name": "@xoner/xoner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Transform any AI coding tool into a smart agent with memory, context, and code wiki (cortex)",
   "keywords": [
     "ai",
