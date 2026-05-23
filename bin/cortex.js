@@ -19,7 +19,7 @@ const { statusCommand } = await import('../src/commands/status.js');
 
 program
   .command('init')
-  .description('Initialize AgentX in current project')
+  .description('Initialize Cortex in current project')
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('--adapters <list>', 'Comma-separated adapters: claude,codex,cursor,windsurf,copilot')
   .action(initCommand);
@@ -32,7 +32,7 @@ program
 
 program
   .command('status')
-  .description('Show current AgentX status for this project')
+  .description('Show current Cortex status for this project')
   .action(statusCommand);
 
 program.parse();
