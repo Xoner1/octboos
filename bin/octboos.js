@@ -8,8 +8,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
 program
-  .name('xoner')
-  .description('Transform any AI tool into a smart agent with memory & context')
+  .name('octboos')
+  .description('One agent to control every AI tool')
   .version(pkg.version);
 
 // Commands
@@ -19,7 +19,7 @@ const { statusCommand } = await import('../src/commands/status.js');
 
 program
   .command('init')
-  .description('Initialize Cortex in current project')
+  .description('Initialize Octboos in current project')
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('--adapters <list>', 'Comma-separated adapters: claude,codex,cursor,windsurf,copilot')
   .action(initCommand);
@@ -32,7 +32,7 @@ program
 
 program
   .command('status')
-  .description('Show current Cortex status for this project')
+  .description('Show current Octboos status for this project')
   .action(statusCommand);
 
 program.parse();

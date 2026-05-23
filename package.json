@@ -1,7 +1,7 @@
 {
-  "name": "@xoner/xoner",
+  "name": "octboos",
   "version": "0.1.1",
-  "description": "Transform any AI coding tool into a smart agent with memory, context, and code wiki (cortex)",
+  "description": "One agent to control every AI tool",
   "keywords": [
     "ai",
     "agent",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "xoner": "bin/xoner.js"
+    "octboos": "bin/octboos.js"
   },
   "main": "./src/index.js",
   "files": [
@@ -24,16 +24,16 @@
     "src/"
   ],
   "scripts": {
-    "dev": "node bin/xoner.js",
+    "dev": "node bin/octboos.js",
     "test": "node --test"
   },
-  "homepage": "https://github.com/Xoner1/cortex",
+  "homepage": "https://github.com/Xoner1/octboos",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Xoner1/cortex.git"
+    "url": "git+https://github.com/Xoner1/octboos.git"
   },
   "bugs": {
-    "url": "https://github.com/Xoner1/cortex/issues"
+    "url": "https://github.com/Xoner1/octboos/issues"
   },
   "dependencies": {
     "@inquirer/prompts": "^3.3.0",

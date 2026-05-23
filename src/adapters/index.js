@@ -39,8 +39,8 @@ export function generateAdapterContent(adapterKey, projectName) {
     case 'claude':
       return `${header}
 
-## Cortex Instructions
-> This file is auto-managed by Cortex. Edit \`.agent/\` files instead.
+## Octboos Instructions
+> This file is auto-managed by Octboos. Edit \`.agent/\` files instead.
 
 ## Before Every Task
 1. Read \`.agent/map.md\` for project structure
@@ -52,14 +52,14 @@ export function generateAdapterContent(adapterKey, projectName) {
 - Project map: \`.agent/map.md\`
 - Code wiki:   \`.agent/wiki/\`
 - User style:  \`.agent/style.md\`
-- Cortex config: \`.agent/config.json\`
+- Octboos config: \`.agent/config.json\`
 `;
 
     case 'codex':
       return `${header}
 
-## Cortex Context
-> Auto-managed by Cortex. Source of truth: \`.agent/\`
+## Octboos Context
+> Auto-managed by Octboos. Source of truth: \`.agent/\`
 
 ## Required Reading
 Before any task, read:
@@ -70,13 +70,13 @@ Before any task, read:
 ## Update Rule
 After completing any task, sync relevant docs:
 \`\`\`
-npx cortex sync --incremental
+npx octboos sync --incremental
 \`\`\`
 `;
 
     case 'cursor':
     case 'windsurf':
-      return `# Cortex Context for ${ADAPTERS[adapterKey].name}
+      return `# Octboos Context for ${ADAPTERS[adapterKey].name}
 > Auto-managed. Edit .agent/ files instead.
 
 Always read .agent/map.md before starting any task.
@@ -86,7 +86,7 @@ Reference .agent/wiki/ for module documentation.
 
     case 'copilot':
       return `# GitHub Copilot Instructions
-> Managed by Cortex
+> Managed by Octboos
 
 ## Context Files
 - \`.agent/map.md\` — project map and stack
@@ -99,7 +99,7 @@ Always reference these files before suggesting code changes.
     case 'gemini':
       return `${header}
 
-## Cortex Context
+## Octboos Context
 Read \`.agent/map.md\` and \`.agent/wiki/\` before any task.
 Follow \`.agent/style.md\` for code conventions.
 `;
@@ -110,7 +110,7 @@ Follow \`.agent/style.md\` for code conventions.
 }
 
 function buildHeader(projectName) {
-  return `# ${projectName || 'Project'} — Cortex Context
+  return `# ${projectName || 'Project'} — Octboos Context
 > Last synced: ${new Date().toISOString().split('T')[0]}
-> Managed by Cortex (https://github.com/Xoner1/cortex.git)`;
+> Managed by Octboos (https://github.com/Octboos1/octboos.git)`;
 }

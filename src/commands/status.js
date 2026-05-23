@@ -9,8 +9,8 @@ export async function statusCommand() {
   console.log('');
 
   if (!existsSync(configPath)) {
-    console.log(chalk.yellow('  ✗ Cortex not initialized in this project'));
-    console.log(chalk.gray('    Run: ') + chalk.white('npx cortex init'));
+    console.log(chalk.yellow('  ✗ Octboos not initialized in this project'));
+    console.log(chalk.gray('    Run: ') + chalk.white('npx octboos init'));
     console.log('');
     return;
   }
@@ -19,14 +19,14 @@ export async function statusCommand() {
   const lastSync = new Date(config.lastSync);
   const hoursSince = Math.floor((Date.now() - lastSync) / 1000 / 60 / 60);
 
-  console.log(chalk.bold.cyan('  Cortex Status'));
+  console.log(chalk.bold.cyan('  Octboos Status'));
   console.log('');
   console.log(chalk.gray('  Project:    ') + chalk.white(config.projectName));
   console.log(chalk.gray('  Version:    ') + chalk.white(config.version));
   console.log(chalk.gray('  Last sync:  ') + (
     hoursSince < 24
       ? chalk.green(`${hoursSince}h ago`)
-      : chalk.yellow(`${Math.floor(hoursSince / 24)}d ago — run cortex sync`)
+      : chalk.yellow(`${Math.floor(hoursSince / 24)}d ago — run octboos sync`)
   ));
 
   // Files
@@ -35,7 +35,7 @@ export async function statusCommand() {
   const agentFiles = [
     ['map.md',      'Project structure'],
     ['style.md',    'Coding style'],
-    ['config.json', 'Cortex config'],
+    ['config.json', 'Octboos config'],
   ];
   for (const [file, desc] of agentFiles) {
     const exists = existsSync(join(cwd, '.agent', file));

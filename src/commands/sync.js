@@ -11,15 +11,15 @@ export async function syncCommand(options) {
 
   if (!existsSync(configPath)) {
     console.log('');
-    console.log(chalk.yellow('  ⚠  Cortex not initialized.'));
-    console.log(chalk.gray('     Run ' + chalk.white('npx cortex init') + ' first.'));
+    console.log(chalk.yellow('  ⚠  Octboos not initialized.'));
+    console.log(chalk.gray('     Run ' + chalk.white('npx octboos init') + ' first.'));
     console.log('');
     return;
   }
 
   const config = JSON.parse(readFileSync(configPath, 'utf8'));
   console.log('');
-  console.log(chalk.bold.cyan(`  Cortex Sync — ${config.projectName}`));
+  console.log(chalk.bold.cyan(`  Octboos Sync — ${config.projectName}`));
   console.log('');
 
   // Scan project
