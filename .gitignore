@@ -1,0 +1,7 @@
+node_modules/
+test-sandbox/
+test-project/
+test-interactive/
+*.log
+.DS_Store
+package-lock.json

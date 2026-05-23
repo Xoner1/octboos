@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, extname, relative } from 'path';
 import fg from 'fast-glob';
+import { execSync } from 'child_process';
 
 // File extensions by language
 const LANG_MAP = {
@@ -194,5 +195,91 @@ export function buildFileMap(scanResult, cwd) {
   lines.push(`## Stats`);
   lines.push(`- Total files: ${scanResult.fileCount}`);
 
-  return lines.join('\n');
+   return lines.join('\n');
+}
+
+export function detectInstalledTools() {
+  const result = {
+    detected: [],
+    uncertain: [],
+    notFound: ['claude', 'opencode', 'cursor', 'aider', 'gemini', 'codex', 'windsurf']
+  };
+
+  // Tools to check via which/where
+  const cliTools = [
+    { name: 'claude', command: 'claude' },
+    { name: 'opencode', command: 'opencode' },
+    { name: 'cursor', command: 'cursor' },
+    { name: 'aider', command: 'aider' },
+    { name: 'gemini', command: 'gemini' },
+    { name: 'codex', command: 'codex' },
+    { name: 'windsurf', command: 'windsurf' }
+  ];
+
+  // Check CLI tools
+  for (const tool of cliTools) {
+    try {
+      const platform = process.platform;
+      let command;
+      if (platform === 'win32') {
+        command = `where ${tool.command}`;
+      } else {
+        command = `which ${tool.command}`;
+      }
+      execSync(command, { stdio: 'ignore' });
+      // Move from notFound to detected
+      result.detected.push(tool.name);
+      result.notFound = result.notFound.filter(t => t !== tool.name);
+    } catch (err) {
+      // Tool not found via CLI, keep in notFound for now
+    }
+  }
+
+  // Check common paths
+  const home = process.env.HOME || process.env.USERPROFILE;
+  const localAppData = process.env.LOCALAPPDATA;
+  const appData = process.env.APPDATA;
+
+  // Mac paths
+  const macPaths = [
+    { tool: 'cursor', path: '/Applications/Cursor.app' },
+    { tool: 'windsurf', path: '/Applications/Windsurf.app' },
+    { tool: 'claude', path: `${home}/.claude/` },
+    { tool: 'aider', path: `${home}/.config/aider/` }
+  ];
+
+  // Windows paths
+  const winPaths = [
+    { tool: 'cursor', path: `${localAppData}\\Programs\\cursor` },
+    { tool: 'claude', path: `${appData}\\Claude\\` }
+  ];
+
+  const pathsToCheck = process.platform === 'win32' ? winPaths : macPaths;
+
+  for (const { tool, path } of pathsToCheck) {
+    try {
+      if (existsSync(path)) {
+        // Move from notFound to detected if not already there
+        if (!result.detected.includes(tool)) {
+          result.detected.push(tool);
+          result.notFound = result.notFound.filter(t => t !== tool);
+        }
+        // If we found it via path but not CLI, mark as uncertain
+        if (!result.detected.includes(tool)) {
+          result.uncertain.push(tool);
+          result.notFound = result.notFound.filter(t => t !== tool);
+          result.detected = result.detected.filter(t => t !== tool);
+        }
+      }
+    } catch (err) {
+      // Path doesn't exist or other error
+    }
+  }
+
+  // Remove duplicates
+  result.detected = [...new Set(result.detected)];
+  result.uncertain = [...new Set(result.uncertain)];
+  result.notFound = [...new Set(result.notFound)];
+
+  return result;
 }

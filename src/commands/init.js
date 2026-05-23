@@ -3,7 +3,7 @@ import { join, dirname } from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
 import { input, checkbox, confirm } from '@inquirer/prompts';
-import { scanProject, buildFileMap } from '../indexer/scanner.js';
+import { scanProject, buildFileMap, detectInstalledTools } from '../indexer/scanner.js';
 import { ADAPTERS, generateAdapterContent } from '../adapters/index.js';
 
 const AGENT_DIR = '.agent';
@@ -26,39 +26,71 @@ export async function initCommand(options) {
     return;
   }
 
-  // Step 1 — Project name
-  let projectName;
+  // Step 0 — Detect installed AI tools
+  let detectedTools = { detected: [], uncertain: [], notFound: [] };
   try {
-    const pkgPath = join(cwd, 'package.json');
-    projectName = existsSync(pkgPath)
-      ? JSON.parse(readFileSync(pkgPath, 'utf8')).name || ''
-      : '';
-  } catch { projectName = ''; }
-
-  if (!options.yes) {
-    projectName = await input({
-      message: 'Project name:',
-      default: projectName || 'my-project',
-    });
+    detectedTools = detectInstalledTools();
+    if (detectedTools.detected.length > 0) {
+      console.log(chalk.gray(`  🔍 Found ${detectedTools.detected.length} tools on your machine`));
+      console.log('');
+    }
+  } catch (err) {
+    // Silently fall back to manual selection if detection fails
   }
 
-  // Step 2 — Choose adapters
-  let selectedAdapters = ['claude', 'codex'];
+   // Step 1 — Project name
+   let projectName;
+   try {
+     const pkgPath = join(cwd, 'package.json');
+     projectName = existsSync(pkgPath)
+       ? JSON.parse(readFileSync(pkgPath, 'utf8')).name || ''
+       : '';
+   } catch { projectName = ''; }
 
-  if (!options.yes && !options.adapters) {
-    selectedAdapters = await checkbox({
-      message: 'Which AI tools do you use?',
-      choices: Object.entries(ADAPTERS).map(([key, val]) => ({
-        name:    `${val.name} (${val.file})`,
-        value:   key,
-        checked: ['claude', 'codex'].includes(key),
-      })),
-    });
-  } else if (options.adapters) {
-    selectedAdapters = options.adapters.split(',').map(s => s.trim());
-  }
+   if (!options.yes) {
+     projectName = await input({
+       message: 'Project name:',
+       default: projectName || 'my-project',
+     });
+   }
 
-  // Step 3 — Scan project
+   // Step 2 — Choose adapters
+   let selectedAdapters = [];
+
+   if (!options.yes && !options.adapters) {
+     // Build choices with pre-checked detected tools
+     const choices = Object.entries(ADAPTERS).map(([key, val]) => {
+       let checked = false;
+       let name = `${val.name} (${val.file})`;
+       
+       // Check if detected
+       if (detectedTools.detected.includes(key)) {
+         checked = true;
+       }
+       // Check if uncertain
+       else if (detectedTools.uncertain.includes(key)) {
+         name += ' (not sure)';
+       }
+       
+       return {
+         name,
+         value: key,
+         checked
+       };
+     });
+
+     selectedAdapters = await checkbox({
+       message: 'Which AI tools do you use?',
+       choices
+     });
+   } else if (options.adapters) {
+     selectedAdapters = options.adapters.split(',').map(s => s.trim());
+   } else {
+     // Default fallback when options.yes is true
+     selectedAdapters = ['claude', 'codex'];
+   }
+
+   // Step 3 — Scan project
   const spinner = ora({
     text: chalk.gray('Scanning project...'),
     color: 'cyan',
