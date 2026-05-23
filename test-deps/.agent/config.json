@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "projectName": "test-deps",
+  "adapters": [
+    "claude",
+    "codex"
+  ],
+  "autoSync": true,
+  "created": "2026-05-23T13:08:11.586Z",
+  "lastSync": "2026-05-23T13:08:11.587Z"
+}
