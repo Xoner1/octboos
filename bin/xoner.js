@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
 program
-  .name('cortex')
+  .name('xoner')
   .description('Transform any AI tool into a smart agent with memory & context')
   .version(pkg.version);
 

@@ -1,5 +1,5 @@
 {
-  "name": "cortex-cli",
+  "name": "xoner",
   "version": "0.1.0",
   "description": "Transform any AI coding tool into a smart agent with memory, context, and code wiki (cortex)",
   "keywords": [
@@ -12,21 +12,28 @@
     "memory",
     "wiki"
   ],
-  "author": "Xoner1",
+  "author": "xoner",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "cortex": "./bin/cortex.js"
+    "xoner": "bin/xoner.js"
   },
   "main": "./src/index.js",
   "files": [
     "bin/",
-    "src/",
-    "templates/"
+    "src/"
   ],
   "scripts": {
-    "dev": "node bin/cortex.js",
+    "dev": "node bin/xoner.js",
     "test": "node --test"
+  },
+  "homepage": "https://github.com/Xoner1/cortex",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xoner1/cortex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xoner1/cortex/issues"
   },
   "dependencies": {
     "@inquirer/prompts": "^3.3.0",
