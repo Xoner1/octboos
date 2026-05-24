@@ -5,3 +5,5 @@ test-interactive/
 *.log
 .DS_Store
 package-lock.json
+# Octboos - keep .agent/ tracked except large files
+.agent/graph.html

@@ -16,6 +16,7 @@ program
 const { initCommand }   = await import('../src/commands/init.js');
 const { syncCommand }   = await import('../src/commands/sync.js');
 const { statusCommand } = await import('../src/commands/status.js');
+const { configCommand } = await import('../src/commands/config.js');
 
 program
   .command('init')
@@ -34,5 +35,13 @@ program
   .command('status')
   .description('Show current Octboos status for this project')
   .action(statusCommand);
+
+program
+  .command('config')
+  .description('Configure AI API key for wiki generation')
+  .option('--key <key>', 'Your API key')
+  .option('--provider <provider>', 'AI provider: claude, openai, or gemini')
+  .option('--show', 'Show current configuration')
+  .action(configCommand);
 
 program.parse();
