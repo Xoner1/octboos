@@ -34,6 +34,26 @@ export const ADAPTERS = {
 
 export function generateAdapterContent(adapterKey, projectName) {
   const header = buildHeader(projectName);
+  const autoDocRule = `
+
+## Auto-Documentation Rule (IMPORTANT)
+After completing ANY task in this project:
+1. Check which files you modified
+2. Update .agent/wiki/[module-name].md with:
+   - What this module does
+   - Recent changes made
+   - Key functions/components
+3. If .agent/wiki/[module-name].md doesn't exist, create it
+4. Update .agent/wiki/INDEX.md with the module link
+
+Module naming:
+- src/auth/** → .agent/wiki/auth.md
+- src/api/** → .agent/wiki/api.md
+- src/components/** → .agent/wiki/components.md
+- src/lib/ or src/utils/ → .agent/wiki/utils.md
+- src/db/ or src/database/ → .agent/wiki/database.md
+- Other → .agent/wiki/general.md
+`;
 
   switch (adapterKey) {
     case 'claude':
@@ -52,7 +72,7 @@ export function generateAdapterContent(adapterKey, projectName) {
 - Project map: \`.agent/map.md\`
 - Code wiki:   \`.agent/wiki/\`
 - User style:  \`.agent/style.md\`
-- Octboos config: \`.agent/config.json\`
+- Octboos config: \`.agent/config.json\`${autoDocRule}
 `;
 
     case 'codex':
@@ -71,7 +91,7 @@ Before any task, read:
 After completing any task, sync relevant docs:
 \`\`\`
 npx octboos sync --incremental
-\`\`\`
+\`\`\`${autoDocRule}
 `;
 
     case 'cursor':
@@ -81,7 +101,7 @@ npx octboos sync --incremental
 
 Always read .agent/map.md before starting any task.
 Follow conventions in .agent/style.md.
-Reference .agent/wiki/ for module documentation.
+Reference .agent/wiki/ for module documentation.${autoDocRule}
 `;
 
     case 'copilot':
@@ -93,7 +113,7 @@ Reference .agent/wiki/ for module documentation.
 - \`.agent/wiki/\` — module documentation
 - \`.agent/style.md\` — code style and conventions
 
-Always reference these files before suggesting code changes.
+Always reference these files before suggesting code changes.${autoDocRule}
 `;
 
     case 'gemini':
@@ -101,7 +121,7 @@ Always reference these files before suggesting code changes.
 
 ## Octboos Context
 Read \`.agent/map.md\` and \`.agent/wiki/\` before any task.
-Follow \`.agent/style.md\` for code conventions.
+Follow \`.agent/style.md\` for code conventions.${autoDocRule}
 `;
 
     default:

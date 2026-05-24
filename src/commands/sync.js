@@ -4,7 +4,6 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { scanProject, buildFileMap } from '../indexer/scanner.js';
 import { ADAPTERS, generateAdapterContent } from '../adapters/index.js';
-import { generateWiki } from '../wiki/generator.js';
 
 export async function syncCommand(options) {
   const cwd = process.cwd();
@@ -45,25 +44,6 @@ export async function syncCommand(options) {
     }
   }
   adapterSpinner.succeed(chalk.green('Updated AI tool configs'));
-
-  // Generate wiki
-  const wikiSpinner = ora({ text: chalk.gray('Generating wiki...'), color: 'cyan' }).start();
-  let wikiResult;
-  try {
-    wikiResult = await generateWiki(cwd, scanResult, (moduleName, success, message) => {
-      if (success) {
-        wikiSpinner.text = chalk.gray(`${moduleName} module...`);
-      }
-    });
-
-    if (wikiResult.skipped) {
-      wikiSpinner.warn(chalk.yellow('Wiki skipped — no API key set'));
-    } else {
-      wikiSpinner.succeed(chalk.green(`Wiki complete — ${wikiResult.count} modules documented`));
-    }
-  } catch (err) {
-    wikiSpinner.fail(chalk.red(`Wiki generation failed: ${err.message}`));
-  }
 
   // Update lastSync in config
   config.lastSync = new Date().toISOString();

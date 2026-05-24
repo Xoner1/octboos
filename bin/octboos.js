@@ -17,6 +17,7 @@ const { initCommand }   = await import('../src/commands/init.js');
 const { syncCommand }   = await import('../src/commands/sync.js');
 const { statusCommand } = await import('../src/commands/status.js');
 const { configCommand } = await import('../src/commands/config.js');
+const { documentCommand } = await import('../src/commands/document.js');
 
 program
   .command('init')
@@ -37,10 +38,14 @@ program
   .action(statusCommand);
 
 program
+  .command('document')
+  .description('Generate a prompt to document your project with AI')
+  .action(documentCommand);
+
+program
   .command('config')
-  .description('Configure AI API key for wiki generation')
-  .option('--key <key>', 'Your API key')
-  .option('--provider <provider>', 'AI provider: claude, openai, or gemini')
+  .description('Configure octboos preferences')
+  .option('--style <style>', 'Wiki style: minimal or detailed')
   .option('--show', 'Show current configuration')
   .action(configCommand);
 
