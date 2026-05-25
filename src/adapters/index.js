@@ -51,9 +51,12 @@ export function generateAdapterContent(adapterKey, projectName) {
   const header = buildHeader(projectName);
   const autoDocRule = `
 
-## Auto-Documentation Rule (CRITICAL)
-After EVERY task you complete:
-1. Identify which module you worked on:
+## 🔄 Auto-Documentation Rule (MANDATORY)
+
+After EVERY task you complete in this project:
+
+1. Identify which files you modified
+2. Map to the wiki module:
    - src/auth/** → .agent/wiki/auth.md
    - src/api/** → .agent/wiki/api.md
    - src/components/** → .agent/wiki/components.md
@@ -61,28 +64,36 @@ After EVERY task you complete:
    - src/db/** or src/database/** → .agent/wiki/database.md
    - Other → .agent/wiki/general.md
 
-2. Update the module wiki file with:
-   - What this module does
-   - Functions/components you added/modified
+3. Update the wiki file with:
+   - What this module does (if first time)
+   - Functions/components added/modified
    - Important changes and why
+   - Dependencies or relationships
 
-3. If the wiki file doesn't exist, CREATE it with:
-   \`\`\`markdown
-   # [Module Name]
-   ## Purpose
-   [What this module does]
-   
-   ## Key Files
-   - [file paths]
-   
-   ## How it works
-   [Brief explanation]
-   
-   ## Recent Changes
-   - [DATE]: [What you changed]
-   \`\`\`
+4. Update .agent/wiki/INDEX.md with module link
 
-4. Update .agent/wiki/INDEX.md to include the module link
+### Wiki File Template
+
+If the wiki file doesn't exist, create it:
+
+# [Module Name]
+
+## Purpose
+[Brief description]
+
+## Key Files
+- [file paths]
+
+## Functions/Components
+- [function name]: [purpose]
+
+## Recent Changes
+- [DATE]: [what changed]
+
+## Dependencies
+- [related modules]
+
+Keep this updated after EVERY task.
 
 ## 📚 Before ANY Task
 1. READ .agent/map.md — Project structure

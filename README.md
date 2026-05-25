@@ -74,5 +74,17 @@ The `.agent/` directory contains:
    npx octboos sync      # Update project map
    ```
 
+## Automatic Wiki Updates
+
+octboos enables automatic wiki updates through AI tools:
+
+1. Run npx octboos init (one time)
+2. Use your AI tool normally (Claude, Cursor, etc.)
+3. After EVERY task, AI automatically updates wiki
+4. No manual commands needed!
+
+The AI reads CLAUDE.md which contains instructions
+to update .agent/wiki/ after each task.
+
 ## License
 MIT

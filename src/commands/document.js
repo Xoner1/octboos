@@ -39,6 +39,10 @@ For each logical module (auth, api, components, etc.):
    ## Main functions/exports
 2. Update .agent/wiki/INDEX.md
 
+IMPORTANT: After completing the task, automatically
+update .agent/wiki/ following the rules in CLAUDE.md.
+Do not wait for manual instruction.
+
 Project structure:
 ${mapContent}
 ─────────────────────────────────────`;
