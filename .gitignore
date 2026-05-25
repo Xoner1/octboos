@@ -7,3 +7,5 @@ test-interactive/
 package-lock.json
 # Octboos - keep .agent/ tracked except large files
 .agent/graph.html
+task.md
+walkthrough.md
