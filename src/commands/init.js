@@ -187,6 +187,12 @@ export async function initCommand(options) {
   console.log(chalk.gray('  ├── ') + chalk.white('style.md     ') + chalk.gray('← coding conventions'));
   console.log(chalk.gray('  └── ') + chalk.white('wiki/        ') + chalk.gray('← auto documentation'));
   console.log('');
+  console.log(chalk.bold('  🚀 Auto-Documentation is now ACTIVE:'));
+  console.log(chalk.gray('  • ') + chalk.white('Claude Code') + chalk.gray(' will read ') + chalk.white('CLAUDE.md'));
+  console.log(chalk.gray('  • ') + chalk.white('Gemini CLI') + chalk.gray(' will read ') + chalk.white('GEMINI.md'));
+  console.log(chalk.gray('  • ') + chalk.white('All configured AI tools') + chalk.gray(' will update ') + chalk.white('.agent/wiki/') + chalk.gray(' after each task'));
+  console.log(chalk.gray('  • Your code documentation is now ') + chalk.bold.green('persistent and automatic! 🐙'));
+  console.log('');
   console.log(chalk.gray('  AI configs:'));
   for (const f of generatedAdapters) {
     console.log(chalk.gray('  ✓ ') + chalk.white(f));
@@ -194,8 +200,9 @@ export async function initCommand(options) {
   console.log('');
   console.log(chalk.bold('  Next steps:'));
   console.log(chalk.cyan('  1.') + chalk.white(' Edit .agent/style.md with your coding conventions'));
-  console.log(chalk.cyan('  2.') + chalk.white(' Run npx octboos sync to update wiki'));
-  console.log(chalk.cyan('  3.') + chalk.white(' Commit .agent/ to git'));
+  console.log(chalk.cyan('  2.') + chalk.white(' Run npx octboos sync to update project structure'));
+  console.log(chalk.cyan('  3.') + chalk.white(' Use npx octboos document to get AI documentation prompt'));
+  console.log(chalk.cyan('  4.') + chalk.white(' Commit .agent/ to git'));
   console.log('');
 }
 

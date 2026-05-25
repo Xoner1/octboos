@@ -49,8 +49,30 @@ The `.agent/` directory contains:
 1. **Initialize** — run `npx octboos init` to create the `.agent/` directory with configuration files
 2. **AI learns** — your AI tool (Claude, Cursor, etc.) reads the generated CLAUDE.md/AGENTS.md etc. to understand your project
 3. **Document automatically** — after each task, your AI tool updates .agent/wiki/ following the rules in its configuration file
-   OR use `npx octboos document` to get a ready-made prompt for manual documentation
+    OR use `npx octboos document` to get a ready-made prompt for manual documentation
 4. **Stay in sync** — run `npx octboos sync` to update the project map (.agent/map.md) as your project evolves
+
+## How Auto-Documentation Works
+
+1. **Initialization**: `npx octboos init` creates:
+   - `.agent/` folder (persistent memory)
+   - `CLAUDE.md`, `GEMINI.md`, etc. (AI instructions)
+
+2. **Automatic Reading**: 
+   - Claude Code automatically reads CLAUDE.md
+   - Gemini automatically reads GEMINI.md
+   - They see instructions to use .agent/
+
+3. **Automatic Writing**:
+   - After EVERY task, the AI updates .agent/wiki/
+   - No manual intervention needed
+   - Your documentation is always current
+
+4. **Manual Trigger** (optional):
+   ```bash
+   npx octboos document  # Get prompt to manually generate wiki
+   npx octboos sync      # Update project map
+   ```
 
 ## License
 MIT

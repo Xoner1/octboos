@@ -18,6 +18,7 @@ const { syncCommand }   = await import('../src/commands/sync.js');
 const { statusCommand } = await import('../src/commands/status.js');
 const { configCommand } = await import('../src/commands/config.js');
 const { documentCommand } = await import('../src/commands/document.js');
+const { verifyCommand } = await import('../src/commands/verify.js');
 
 program
   .command('init')
@@ -41,6 +42,11 @@ program
   .command('document')
   .description('Generate a prompt to document your project with AI')
   .action(documentCommand);
+
+program
+  .command('verify')
+  .description('Verify octboos setup and AI tool integration')
+  .action(verifyCommand);
 
 program
   .command('config')
