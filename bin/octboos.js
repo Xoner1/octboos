@@ -19,6 +19,7 @@ const { statusCommand } = await import('../src/commands/status.js');
 const { configCommand } = await import('../src/commands/config.js');
 const { documentCommand } = await import('../src/commands/document.js');
 const { verifyCommand } = await import('../src/commands/verify.js');
+const { startUIServer } = await import('../src/ui/server.js');
 
 program
   .command('init')
@@ -41,7 +42,8 @@ program
 program
   .command('document')
   .description('Generate a prompt to document your project with AI')
-  .action(documentCommand);
+  .option('--copy', 'Copy prompt to clipboard')
+  .action((opts) => documentCommand(opts));
 
 program
   .command('verify')
@@ -54,5 +56,10 @@ program
   .option('--style <style>', 'Wiki style: minimal or detailed')
   .option('--show', 'Show current configuration')
   .action(configCommand);
+
+program
+  .command('ui')
+  .description('Start Octboos Cockpit UI dashboard')
+  .action(() => startUIServer(process.cwd()));
 
 program.parse();

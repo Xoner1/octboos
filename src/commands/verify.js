@@ -115,13 +115,13 @@ export async function verifyCommand() {
       // Check if file contains octboos content
       try {
         const content = readFileSync(filePath, 'utf8');
-        const hasOctboos = content.includes('Octboos') || content.includes('Auto-Documentation');
+        const hasOctboos = content.toLowerCase().includes('octboos') || content.includes('Auto-Documentation');
         if (!hasOctboos) {
           console.log(chalk.gray('    ⚠ File exists but may not contain octboos instructions'));
         }
         
         // Check if it's a main adapter that should have auto-doc rules
-        if (['claude', 'gemini', 'codex'].includes(adapterKey) && content.includes('Auto-Documentation Rule')) {
+        if (['claude', 'gemini', 'codex', 'antigravity'].includes(adapterKey) && (content.includes('Auto-Documentation Rule') || content.includes('update .agent/wiki/'))) {
           foundMainAdapterWithRules = true;
         }
       } catch (err) {
@@ -140,19 +140,77 @@ export async function verifyCommand() {
   }
   console.log('');
 
-  // Check 5: Auto-documentation rules
+  // Check 5: Protocol Enforcement
+  console.log(chalk.bold('📋 Protocol Enforcement:'));
+  const protocolPath = join(agentDir, 'protocol.md');
+  const protocolExists = existsSync(protocolPath);
+  let protocolValid = false;
+  
+  if (protocolExists) {
+    const protocolContent = readFileSync(protocolPath, 'utf8');
+    const hasBeforeTask = protocolContent.includes('Before ANY Task');
+    const hasAfterTask = protocolContent.includes('After EVERY Task');
+    const hasEnforcement = protocolContent.includes('FAILURE TO FOLLOW');
+    protocolValid = hasBeforeTask && hasAfterTask && hasEnforcement;
+    
+    if (protocolValid) {
+      console.log(chalk.green('  ✓ ') + '.agent/protocol.md exists and is valid');
+    } else {
+      console.log(chalk.yellow('  ⚠ ') + '.agent/protocol.md exists but is missing required sections');
+      if (!hasBeforeTask) console.log(chalk.gray('    Missing: ') + chalk.white('"Before ANY Task" section'));
+      if (!hasAfterTask) console.log(chalk.gray('    Missing: ') + chalk.white('"After EVERY Task" section'));
+      if (!hasEnforcement) console.log(chalk.gray('    Missing: ') + chalk.white('Enforcement statement'));
+    }
+  } else {
+    console.log(chalk.red('  ✗ ') + '.agent/protocol.md — Missing (mandatory)');
+  }
+  
+  // Check that adapter files reference protocol.md
+  let adaptersWithProtocolRef = 0;
+  let totalSelectedAdapters = 0;
+  
+  for (const [adapterKey, adapter] of Object.entries(ADAPTERS)) {
+    const filePath = join(cwd, adapter.file);
+    if (existsSync(filePath) && selectedAdapters.includes(adapterKey)) {
+      totalSelectedAdapters++;
+      try {
+        const content = readFileSync(filePath, 'utf8');
+        if (content.includes('protocol.md') || content.includes('PROTOCOL')) {
+          adaptersWithProtocolRef++;
+        }
+      } catch (err) {
+        // skip unreadable files
+      }
+    }
+  }
+  
+  if (totalSelectedAdapters > 0) {
+    if (adaptersWithProtocolRef === totalSelectedAdapters) {
+      console.log(chalk.green('  ✓ ') + 'All selected adapter files reference protocol.md');
+    } else {
+      console.log(chalk.yellow('  ⚠ ') + `Only ${adaptersWithProtocolRef}/${totalSelectedAdapters} adapter files reference protocol.md`);
+      console.log(chalk.gray('    Run: ') + chalk.white('npx octboos sync') + ' to regenerate adapter files');
+    }
+  } else if (protocolExists) {
+    console.log(chalk.gray('  - No adapter files to check for protocol references'));
+  } else {
+    console.log(chalk.gray('  - Skipping adapter protocol check (protocol.md missing)'));
+  }
+  console.log('');
+
+  // Check 6: Auto-documentation rules
   console.log(chalk.bold('📜 Auto-Documentation Rules:'));
   let hasAutoDocRules = false;
   
   // Check main adapters for auto-doc rules
-  const mainAdapters = ['claude', 'gemini', 'codex'];
+  const mainAdapters = ['claude', 'gemini', 'codex', 'antigravity'];
   for (const adapterKey of mainAdapters) {
-    if (ADAPTERS[adapterKey]) {
+    if (Object.prototype.hasOwnProperty.call(ADAPTERS, adapterKey) && ADAPTERS[adapterKey]) {
       const filePath = join(cwd, ADAPTERS[adapterKey].file);
       if (existsSync(filePath)) {
         try {
           const content = readFileSync(filePath, 'utf8');
-          if (content.includes('Auto-Documentation Rule')) {
+          if (content.includes('Auto-Documentation Rule') || content.includes('update .agent/wiki/')) {
             hasAutoDocRules = true;
             break;
           }
@@ -172,20 +230,24 @@ export async function verifyCommand() {
   }
   console.log('');
 
-  // Check 6: Recommendations
+  // Check 7: Recommendations
   console.log(chalk.bold('💡 Recommendations:'));
   
   const issues = [];
   if (!existsSync(join(agentDir, 'config.json'))) issues.push('Initialize project with npx octboos init');
+  if (!protocolExists) issues.push('Create protocol.md with npx octboos init');
+  if (protocolExists && !protocolValid) issues.push('Fix protocol.md to include all required sections');
   if (selectedAdapters.length > 0 && !allSelectedAdaptersPresent) issues.push('Regenerate adapter files with npx octboos sync');
+  if (totalSelectedAdapters > 0 && adaptersWithProtocolRef < totalSelectedAdapters) issues.push('Regenerate adapter files to include protocol.md reference with npx octboos sync');
   if (!foundMainAdapterWithRules && selectedAdapters.some(a => ['claude', 'gemini', 'codex'].includes(a))) issues.push('Update adapter files with npx octboos sync');
   
   if (issues.length === 0) {
     console.log(chalk.green('  🎉 All checks passed! Octboos is ready to use.'));
     console.log(chalk.gray('    Your AI tools will now:'));
-    console.log(chalk.gray('    1. Read adapter files for context'));
-    console.log(chalk.gray('    2. Automatically update .agent/wiki/ after tasks'));
-    console.log(chalk.gray('    3. Keep your documentation persistent and current'));
+    console.log(chalk.gray('    1. Read protocol.md for mandatory execution rules'));
+    console.log(chalk.gray('    2. Read adapter files for AI tool context'));
+    console.log(chalk.gray('    3. Automatically update .agent/wiki/ after tasks'));
+    console.log(chalk.gray('    4. Keep your documentation persistent and current'));
   } else {
     console.log(chalk.yellow('  Please address the following:'));
     for (const issue of issues) {

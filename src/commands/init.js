@@ -87,7 +87,7 @@ export async function initCommand(options) {
      selectedAdapters = options.adapters.split(',').map(s => s.trim());
    } else {
      // Default fallback when options.yes is true
-     selectedAdapters = ['claude', 'codex'];
+     selectedAdapters = ['claude', 'codex', 'gemini', 'antigravity'];
    }
 
    // Step 3 — Scan project
@@ -134,6 +134,9 @@ export async function initCommand(options) {
   // style.md
   writeFileSync(join(agentDir, 'style.md'), buildStyleTemplate(projectName));
 
+  // protocol.md
+  writeFileSync(join(agentDir, 'protocol.md'), buildProtocolTemplate(projectName));
+
   // wiki/INDEX.md
   writeFileSync(join(wikiDir, 'INDEX.md'), buildWikiIndex(projectName, scanResult));
 
@@ -144,6 +147,7 @@ export async function initCommand(options) {
 
   const generatedAdapters = [];
   for (const adapterKey of selectedAdapters) {
+    if (!Object.prototype.hasOwnProperty.call(ADAPTERS, adapterKey)) continue;
     const adapter = ADAPTERS[adapterKey];
     if (!adapter) continue;
 
@@ -156,10 +160,10 @@ export async function initCommand(options) {
     if (existsSync(filePath)) {
       const existing = readFileSync(filePath, 'utf8');
       if (!existing.includes('Octboos')) {
-        writeFileSync(filePath, existing + '\n\n' + generateAdapterContent(adapterKey, projectName));
+        writeFileSync(filePath, existing + '\n\n' + generateAdapterContent(adapterKey, projectName, scanResult, cwd));
       }
     } else {
-      writeFileSync(filePath, generateAdapterContent(adapterKey, projectName));
+      writeFileSync(filePath, generateAdapterContent(adapterKey, projectName, scanResult, cwd));
     }
 
     generatedAdapters.push(adapter.file);
@@ -263,4 +267,19 @@ function buildWikiIndex(projectName, scanResult) {
   }
 
   return lines.join('\n');
+}
+
+function buildProtocolTemplate(projectName) {
+  return `# Execution Protocol — ${projectName}
+> Mandatory execution steps for all AI tasks.
+
+## Before ANY Task
+1. Check .agent/map.md for project structure
+2. Follow coding style in .agent/style.md
+
+## After EVERY Task
+1. Update .agent/wiki/[module].md documentation
+
+⚠️ FAILURE TO FOLLOW PROTOCOL = INCORRECT IMPLEMENTATION.
+`;
 }

@@ -36,11 +36,12 @@ export async function syncCommand(options) {
   // Update adapter files
   const adapterSpinner = ora({ text: chalk.gray('Updating AI tool configs...'), color: 'cyan' }).start();
   for (const adapterKey of config.adapters) {
+    if (!Object.prototype.hasOwnProperty.call(ADAPTERS, adapterKey)) continue;
     const adapter = ADAPTERS[adapterKey];
     if (!adapter) continue;
     const filePath = join(cwd, adapter.file);
     if (existsSync(filePath)) {
-      writeFileSync(filePath, generateAdapterContent(adapterKey, config.projectName));
+      writeFileSync(filePath, generateAdapterContent(adapterKey, config.projectName, scanResult, cwd));
     }
   }
   adapterSpinner.succeed(chalk.green('Updated AI tool configs'));

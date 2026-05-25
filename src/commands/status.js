@@ -64,6 +64,7 @@ export async function statusCommand() {
   console.log(chalk.gray('  AI tools configured:'));
   const { ADAPTERS } = await import('../adapters/index.js');
   for (const adapterKey of config.adapters) {
+    if (!Object.prototype.hasOwnProperty.call(ADAPTERS, adapterKey)) continue;
     const adapter = ADAPTERS[adapterKey];
     if (!adapter) continue;
     const exists = existsSync(join(cwd, adapter.file));

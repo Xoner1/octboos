@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Octboos Cockpit</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; }
+  .app { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.25rem; }
+  .subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .card { background: #1e293b; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #334155; }
+  .card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.5rem; }
+  .card .value { font-size: 2rem; font-weight: 700; color: #38bdf8; }
+  .card .value.green { color: #4ade80; }
+  .card .value.yellow { color: #facc15; }
+  .card .value.red { color: #f87171; }
+  .section { margin-bottom: 2rem; }
+  .section h2 { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: #94a3b8; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 1px solid #334155; }
+  td { padding: 0.5rem 0.75rem; font-size: 0.875rem; border-bottom: 1px solid #1e293b; }
+  .badge { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+  .badge.green { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+  .badge.red { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+  .badge.yellow { background: rgba(250, 204, 21, 0.1); color: #facc15; }
+  .heatmap { margin-top: 1rem; }
+  .heatmap svg { display: block; margin: 0 auto; }
+  .error { color: #f87171; text-align: center; padding: 2rem; }
+  .status-bar { height: 2px; background: #334155; border-radius: 1px; margin-bottom: 0.5rem; overflow: hidden; }
+  .status-bar .fill { height: 100%; border-radius: 1px; transition: width 0.5s ease; }
+  .loading { text-align: center; padding: 4rem; color: #64748b; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🛸 Octboos Cockpit</h1>
+  <p class="subtitle">Project monitoring dashboard</p>
+
+  <div class="grid" id="statsGrid">
+    <div class="card"><h3>Status</h3><div class="value" id="statusValue">—</div></div>
+    <div class="card"><h3>Protocol</h3><div class="value" id="protocolValue">—</div></div>
+    <div class="card"><h3>Wiki Files</h3><div class="value" id="wikiValue">—</div></div>
+    <div class="card"><h3>Uptime</h3><div class="value" id="uptimeValue">—</div></div>
+  </div>
+
+  <div class="section">
+    <h2>📁 .agent/ Files</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Status</th></tr></thead>
+      <tbody id="filesTable"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🧩 Adapter Files</h2>
+    <table>
+      <thead><tr><th>Adapter</th><th>File</th><th>Status</th></tr></thead>
+      <tbody id="adaptersTable"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>📊 Activity Heatmap</h2>
+    <div class="heatmap" id="heatmap"></div>
+  </div>
+</div>
+
+<script>
+let refreshInterval;
+
+function fmtTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${h}h ${m}m ${s}s`;
+}
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function drawHeatmap(files) {
+  const container = document.getElementById('heatmap');
+  container.innerHTML = '';
+
+  if (!files || files.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#64748b;">No file data available</p>';
+    return;
+  }
+
+  const now = Date.now();
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+
+  // Filter files modified in last 7 days
+  const recentFiles = files.filter(f => f.modified >= sevenDaysAgo);
+  if (recentFiles.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#64748b;">No activity in the last 7 days</p>';
+    return;
+  }
+
+  const cellSize = 15;
+  const padding = 2;
+  const cols = Math.min(recentFiles.length, 52);
+  const rows = 1;
+
+  const width = cols * (cellSize + padding) + 40;
+  const height = rows * (cellSize + padding) + 20;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+  svg.selectAll('rect')
+    .data(recentFiles.slice(0, cols))
+    .enter().append('rect')
+    .attr('x', (d, i) => i * (cellSize + padding) + 40)
+    .attr('y', 10)
+    .attr('width', cellSize)
+    .attr('height', cellSize)
+    .attr('rx', 2)
+    .attr('fill', d => {
+      const age = (now - d.modified) / 1000;
+      if (age < 3600) return '#4ade80';       // < 1 hour
+      if (age < 86400) return '#38bdf8';      // < 1 day
+      return '#334155';                         // older
+    })
+    .append('title')
+    .text(d => `${d.name}\nModified: ${new Date(d.modified).toLocaleString()}\nSize: ${fmtSize(d.size)}`);
+}
+
+async function loadDashboard() {
+  try {
+    const [statusRes, structureRes, configRes] = await Promise.all([
+      fetch('/api/status'),
+      fetch('/api/structure'),
+      fetch('/api/config'),
+    ]);
+
+    const status = await statusRes.json();
+    const structure = await structureRes.json();
+    const config = await configRes.json();
+
+    // Status cards
+    const statusEl = document.getElementById('statusValue');
+    statusEl.textContent = status.initialized ? 'Active' : 'Not Init';
+    statusEl.className = 'value ' + (status.initialized ? 'green' : 'red');
+
+    const protocolEl = document.getElementById('protocolValue');
+    protocolEl.textContent = status.protocolExists ? 'Loaded' : 'Missing';
+    protocolEl.className = 'value ' + (status.protocolExists ? 'green' : 'red');
+
+    document.getElementById('wikiValue').textContent = status.wikiFiles;
+    document.getElementById('uptimeValue').textContent = fmtTime(status.uptime);
+
+    // Files table
+    const filesTable = document.getElementById('filesTable');
+    filesTable.innerHTML = '';
+    const files = structure.files || [];
+    for (const file of files) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><code>${file.path}</code></td>
+        <td>${file.isDirectory ? '📁 Directory' : '📄 File'}</td>
+        <td>${fmtSize(file.size)}</td>
+        <td><span class="badge green">✓</span></td>
+      `;
+      filesTable.appendChild(tr);
+    }
+
+    // Adapter table
+    const adaptersTable = document.getElementById('adaptersTable');
+    adaptersTable.innerHTML = '';
+    for (const adapter of status.adapterFiles) {
+      const tr = document.createElement('tr');
+      const exists = adapter.exists;
+      tr.innerHTML = `
+        <td><strong>${adapter.name}</strong></td>
+        <td><code>${adapter.name}.md</code></td>
+        <td><span class="badge ${exists ? 'green' : 'red'}">${exists ? '✓ Present' : '✗ Missing'}</span></td>
+      `;
+      adaptersTable.appendChild(tr);
+    }
+
+    // Heatmap
+    drawHeatmap(files);
+
+  } catch (err) {
+    console.error('Dashboard load error:', err);
+    document.querySelector('.app').innerHTML = `
+      <h1>🛸 Octboos Cockpit</h1>
+      <div class="error">⚠️ Could not connect to octboos server.<br>Make sure the project is initialized.</div>
+    `;
+  }
+}
+
+// Auto-refresh every 10 seconds
+loadDashboard();
+if (refreshInterval) clearInterval(refreshInterval);
+refreshInterval = setInterval(loadDashboard, 10000);
+</script>
+</body>
+</html>
